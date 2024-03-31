@@ -639,6 +639,13 @@ class EPD7in5v2(WaveshareFull):
             return -1
         self.reset()
 
+        # from line 92 of epd7in5_V2.py
+        self.send_command(0x06)     # btst
+        self.send_data(0x17)
+        self.send_data(0x17)
+        self.send_data(0x28)        # If an exception is displayed, try using 0x38
+        self.send_data(0x17)
+
         self.send_command(self.POWER_SETTING)
         self.send_data(0x07) # VDS_EN, VDG_EN
         self.send_data(0x07) # VCOM_HV, VGHL_LV[1], VGHL_LV[0]
@@ -650,6 +657,13 @@ class EPD7in5v2(WaveshareFull):
 
         self.send_command(self.PANEL_SETTING)
         self.send_data(0x1f) # KW-3f   KWR-2F        BWROTP 0f       BWOTP 1f
+
+        # from line 111 of epd7in5_V2.py
+        self.send_command(0x61)        	#tres
+        self.send_data(0x03)		#source 800
+        self.send_data(0x20)
+        self.send_data(0x01)		#gate 480
+        self.send_data(0xE0)
 
         self.send_command(0x15)
         self.send_data(0x00)
