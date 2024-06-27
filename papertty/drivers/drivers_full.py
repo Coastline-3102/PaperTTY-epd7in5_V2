@@ -639,6 +639,7 @@ class EPD7in5v2(WaveshareFull):
             return -1
         self.reset()
 
+        print("Starting command block 1") # runs fine
         # from line 92 of epd7in5_V2.py
         self.send_command(0x06)     # btst
         self.send_data(0x17)
@@ -646,18 +647,24 @@ class EPD7in5v2(WaveshareFull):
         self.send_data(0x28)        # If an exception is displayed, try using 0x38
         self.send_data(0x17)
 
+        print("Starting command block 2") # runs fine
         self.send_command(self.POWER_SETTING)
         self.send_data(0x07) # VDS_EN, VDG_EN
         self.send_data(0x07) # VCOM_HV, VGHL_LV[1], VGHL_LV[0]
         self.send_data(0x3f) # VDH
         self.send_data(0x3f) # VDL
-
-        self.send_command(self.POWER_ON)
+        
+        print("Starting command block 3") 
+        print("Sending power on")
+        self.send_command(self.POWER_ON) 
+        print("Waiting") # Hangs here. Never goes idle?
         self.wait_until_idle()
 
+        print("Starting command block 4")
         self.send_command(self.PANEL_SETTING)
         self.send_data(0x1f) # KW-3f   KWR-2F        BWROTP 0f       BWOTP 1f
 
+        print("Starting command block 5")
         # from line 111 of epd7in5_V2.py
         self.send_command(0x61)        	#tres
         self.send_data(0x03)		#source 800
@@ -665,13 +672,16 @@ class EPD7in5v2(WaveshareFull):
         self.send_data(0x01)		#gate 480
         self.send_data(0xE0)
 
+        print("Starting command block 6")
         self.send_command(0x15)
         self.send_data(0x00)
 
+        print("Starting command block 7")
         self.send_command(self.VCOM_AND_DATA_INTERVAL_SETTING)
         self.send_data(0x10)
         self.send_data(0x07)
 
+        print("Starting command block 8")
         self.send_command(self.TCON_SETTING)
         self.send_data(0x22)
 
@@ -728,7 +738,7 @@ class EPD7in5v2(WaveshareFull):
         self.digital_write(self.RST_PIN, GPIO.HIGH)
         self.delay_ms(200)
         self.digital_write(self.RST_PIN, GPIO.LOW)
-        self.delay_ms(2)
+        self.delay_ms(4) # increased to 4 to match waveshare code
         self.digital_write(self.RST_PIN, GPIO.HIGH)
         self.delay_ms(200)
 
@@ -740,5 +750,29 @@ class EPD7in5v2(WaveshareFull):
         """
         self.send_command(0x71)
         while self.digital_read(self.BUSY_PIN) == 0:  # 0: busy, 1: idle
-            self.delay_ms(20)
+            print(f"Busy pin is {self.digital_read(self.BUSY_PIN)}") 
             self.send_command(0x71)
+            print("Sending 0x71")
+            self.delay_ms(200) # adjusting this to 200 ms to match waveshare code
+
+    # functions from EPD2in13v4 driver (drivers_partial.py)
+    def send_command(self, command):
+        import RPi.GPIO as GPIO
+        print("Using New Func!")
+        self.digital_write(self.CS_PIN, GPIO.LOW)
+        super().send_command(command)
+        self.digital_write(self.CS_PIN, GPIO.HIGH)
+
+    def send_data(self, data):
+        import RPi.GPIO as GPIO
+        print("Using New Func!")
+        self.digital_write(self.CS_PIN, GPIO.LOW)
+        super().send_data(data)
+        self.digital_write(self.CS_PIN, GPIO.HIGH)
+
+    def send_data_multi(self, data):
+        import RPi.GPIO as GPIO
+        print("Using New Func!")
+        self.digital_write(self.CS_PIN, GPIO.LOW)
+        super().send_data_multi(data)
+        self.digital_write(self.CS_PIN, GPIO.HIGH)
