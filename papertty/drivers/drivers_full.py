@@ -736,11 +736,11 @@ class EPD7in5v2(WaveshareFull):
         import RPi.GPIO as GPIO
 
         self.digital_write(self.RST_PIN, GPIO.HIGH)
-        self.delay_ms(200)
+        self.delay_ms(20) # reduced to 20 to match ws code
         self.digital_write(self.RST_PIN, GPIO.LOW)
         self.delay_ms(4) # increased to 4 to match waveshare code
         self.digital_write(self.RST_PIN, GPIO.HIGH)
-        self.delay_ms(200)
+        self.delay_ms(20)
 
     def wait_until_idle(self):
         """
@@ -756,23 +756,49 @@ class EPD7in5v2(WaveshareFull):
             self.delay_ms(200) # adjusting this to 200 ms to match waveshare code
 
     # functions from EPD2in13v4 driver (drivers_partial.py)
+    # def send_command(self, command):
+    #     import RPi.GPIO as GPIO
+    #     print("Using New Func!")
+    #     self.digital_write(self.CS_PIN, GPIO.LOW)
+    #     super().send_command(command)
+    #     self.digital_write(self.CS_PIN, GPIO.HIGH)
+
+    # def send_data(self, data):
+    #     import RPi.GPIO as GPIO
+    #     print("Using New Func!")
+    #     self.digital_write(self.CS_PIN, GPIO.LOW)
+    #     super().send_data(data)
+    #     self.digital_write(self.CS_PIN, GPIO.HIGH)
+
+    # def send_data_multi(self, data):
+    #     import RPi.GPIO as GPIO
+    #     print("Using WS New Func!")
+    #     self.digital_write(self.CS_PIN, GPIO.LOW)
+    #     super().send_data_multi(data)
+    #     self.digital_write(self.CS_PIN, GPIO.HIGH)
+
+
+  # functions from waveshare driver
     def send_command(self, command):
-        import RPi.GPIO as GPIO
-        print("Using New Func!")
-        self.digital_write(self.CS_PIN, GPIO.LOW)
-        super().send_command(command)
-        self.digital_write(self.CS_PIN, GPIO.HIGH)
+        print("Using WS New Func!")
+        self.digital_write(self.DC_PIN, 0)
+        self.digital_write(self.CS_PIN, 0)
+        self.spi_writebyte([command])
+        self.digital_write(self.CS_PIN, 1)
 
     def send_data(self, data):
-        import RPi.GPIO as GPIO
-        print("Using New Func!")
-        self.digital_write(self.CS_PIN, GPIO.LOW)
-        super().send_data(data)
-        self.digital_write(self.CS_PIN, GPIO.HIGH)
+        print("Using WS New Func!")
+        self.digital_write(self.DC_PIN, 1)
+        self.digital_write(self.CS_PIN, 0)
+        self.spi_writebyte([data])
+        self.digital_write(self.CS_PIN, 1)
 
     def send_data_multi(self, data):
-        import RPi.GPIO as GPIO
-        print("Using New Func!")
-        self.digital_write(self.CS_PIN, GPIO.LOW)
-        super().send_data_multi(data)
-        self.digital_write(self.CS_PIN, GPIO.HIGH)
+        print("Using WS New Func!")
+        self.digital_write(self.DC_PIN, 1)
+        self.digital_write(self.CS_PIN, 0)
+        self.SPI.writebytes2(data)
+        self.digital_write(self.CS_PIN, 1)
+
+    def spi_writebyte(self, data):
+        self.SPI.writebytes(data)
