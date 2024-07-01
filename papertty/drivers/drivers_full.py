@@ -657,6 +657,7 @@ class EPD7in5v2(WaveshareFull):
         print("Starting command block 3") 
         print("Sending power on")
         self.send_command(self.POWER_ON) 
+        # self.delay_ms(200) # 200ms delay
         print("Waiting") # Hangs here. Never goes idle?
         self.wait_until_idle()
 
@@ -733,14 +734,18 @@ class EPD7in5v2(WaveshareFull):
         https://github.com/waveshare/e-Paper/blob/702def06bcb75983c98b0f9d25d43c552c248eb0/RaspberryPi%26JetsonNano/python/lib/waveshare_epd/epd1in54c.py#L46-L52
         """
         # Deliberately importing here to achieve same fail-on-use import behaviour as in `drivers_base.py`
-        import RPi.GPIO as GPIO
-
-        self.digital_write(self.RST_PIN, GPIO.HIGH)
-        self.delay_ms(20) # reduced to 20 to match ws code
-        self.digital_write(self.RST_PIN, GPIO.LOW)
-        self.delay_ms(4) # increased to 4 to match waveshare code
-        self.digital_write(self.RST_PIN, GPIO.HIGH)
-        self.delay_ms(20)
+        # import RPi.GPIO as GPIO
+        delay_1 = 20
+        delay_2 = 2
+        delay_3 = 20
+        # print the values of delay_1, delay_2, delay_3
+        print(f"delay_1: {delay_1}, delay_2: {delay_2}, delay_3: {delay_3}")
+        self.digital_write(self.RST_PIN, 1)
+        self.delay_ms(delay_1) # reduced to 20 to match ws code
+        self.digital_write(self.RST_PIN, 0)
+        self.delay_ms(delay_2) # increased to 4 to match waveshare code
+        self.digital_write(self.RST_PIN, 1)
+        self.delay_ms(delay_3)
 
     def wait_until_idle(self):
         """
@@ -749,11 +754,17 @@ class EPD7in5v2(WaveshareFull):
         https://github.com/waveshare/e-Paper/blob/702def06bcb75983c98b0f9d25d43c552c248eb0/RaspberryPi%26JetsonNano/python/lib/waveshare_epd/epd7in5_V2.py#L68-L75
         """
         self.send_command(0x71)
-        while self.digital_read(self.BUSY_PIN) == 0:  # 0: busy, 1: idle
+        count = 0
+        print("Entering while loop....")
+        print(f"Busy pin is {self.digital_read(self.BUSY_PIN)}")
+        print(f"Count is {count}")
+        while (self.digital_read(self.BUSY_PIN) == 0) and (count < 100):  # 0: busy, 1: idle
             print(f"Busy pin is {self.digital_read(self.BUSY_PIN)}") 
             self.send_command(0x71)
             print("Sending 0x71")
-            self.delay_ms(200) # adjusting this to 200 ms to match waveshare code
+            self.delay_ms(20) # adjusting this to 200 ms to match waveshare code
+            # count += 1
+            print(f"Count is {count}")
 
     # functions from EPD2in13v4 driver (drivers_partial.py)
     # def send_command(self, command):
@@ -780,21 +791,21 @@ class EPD7in5v2(WaveshareFull):
 
   # functions from waveshare driver
     def send_command(self, command):
-        print("Using WS New Func!")
+        #print("Using WS New Func!")
         self.digital_write(self.DC_PIN, 0)
         self.digital_write(self.CS_PIN, 0)
         self.spi_writebyte([command])
         self.digital_write(self.CS_PIN, 1)
 
     def send_data(self, data):
-        print("Using WS New Func!")
+        #print("Using WS New Func!")
         self.digital_write(self.DC_PIN, 1)
         self.digital_write(self.CS_PIN, 0)
         self.spi_writebyte([data])
         self.digital_write(self.CS_PIN, 1)
 
     def send_data_multi(self, data):
-        print("Using WS New Func!")
+        #print("Using WS New Func!")
         self.digital_write(self.DC_PIN, 1)
         self.digital_write(self.CS_PIN, 0)
         self.SPI.writebytes2(data)
